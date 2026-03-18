@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -29,7 +31,7 @@ if (!defined('_PS_VERSION_')) {
 
 class Gsitemap extends Module
 {
-    const HOOK_ADD_URLS = 'gSitemapAppendUrls';
+    public const HOOK_ADD_URLS = 'gSitemapAppendUrls';
 
     /**
      * @var bool
@@ -283,7 +285,7 @@ class Gsitemap extends Module
             $this->emptySitemap();
             $this->createSitemap();
 
-        /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
+            /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
         } elseif (Tools::getValue('continue')) {
             $this->createSitemap();
         }
@@ -672,7 +674,8 @@ class Gsitemap extends Module
         }
 
         // Get manufacturers IDs
-        $manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
+        $manufacturers_id = Db::getInstance()->ExecuteS(
+            'SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
             INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`' .
             ' INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer`' .
             ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= ' . (int) $id_manufacturer .
