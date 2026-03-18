@@ -150,10 +150,15 @@ class Gsitemap extends Module
             if (in_array($meta['page'], $this->disallow_controllers)) {
                 continue;
             }
-
             // We also remove best-sales, manufacturer and supplier,
             // because they are managed automatically depending on back office settings
-            if ($meta['page'] === 'best-sales' || $meta['page'] === 'manufacturer' || $meta['page'] === 'supplier') {
+            if ($meta['page'] === 'best-sales') {
+                continue;
+            }
+            if ($meta['page'] === 'manufacturer') {
+                continue;
+            }
+            if ($meta['page'] === 'supplier') {
                 continue;
             }
 
@@ -364,58 +369,56 @@ class Gsitemap extends Module
             ++$i;
 
             return true;
-        } else {
-            $this->recursiveSitemapCreator($link_sitemap, $lang, $index);
-            if ($index % 20 == 0 && !$this->cron) {
-                $this->context->smarty->assign([
-                    'gsitemap_number' => (int) $index,
-                    'gsitemap_refresh_page' => $this->context->link->getAdminLink('AdminModules', true, [], [
-                        'tab_module' => $this->tab,
-                        'module_name' => $this->name,
-                        'continue' => 1,
-                        'type' => $new_link['type'],
-                        'lang' => $lang,
-                        'index' => $index,
-                        'id' => (int) $id_obj,
-                        'id_shop' => $this->context->shop->id,
-                    ]),
-                ]);
-
-                return false;
-            } elseif ($index % 20 == 0 && $this->cron) {
-                header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
-                exit();
-            } else {
-                if ($this->cron) {
-                    Tools::redirect($this->context->link->getModuleLink(
-                        'gsitemap',
-                        'cron',
-                        [
-                            'continue' => '1',
-                            'token' => Tools::substr(Tools::hash('gsitemap/cron'), 0, 10),
-                            'type' => $new_link['type'],
-                            'lang' => $lang,
-                            'index' => $index,
-                            'id' => (int) $id_obj,
-                            'id_shop' => $this->context->shop->id,
-                        ]
-                    ));
-                } else {
-                    Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
-                        'tab_module' => $this->tab,
-                        'module_name' => $this->name,
-                        'configure' => $this->name,
-                        'continue' => 1,
-                        'type' => $new_link['type'],
-                        'lang' => $lang,
-                        'index' => $index,
-                        'id' => (int) $id_obj,
-                        'id_shop' => $this->context->shop->id,
-                    ]));
-                }
-                exit();
-            }
         }
+        $this->recursiveSitemapCreator($link_sitemap, $lang, $index);
+        if ($index % 20 == 0 && !$this->cron) {
+            $this->context->smarty->assign([
+                'gsitemap_number' => (int) $index,
+                'gsitemap_refresh_page' => $this->context->link->getAdminLink('AdminModules', true, [], [
+                    'tab_module' => $this->tab,
+                    'module_name' => $this->name,
+                    'continue' => 1,
+                    'type' => $new_link['type'],
+                    'lang' => $lang,
+                    'index' => $index,
+                    'id' => (int) $id_obj,
+                    'id_shop' => $this->context->shop->id,
+                ]),
+            ]);
+            return false;
+        }
+        if ($index % 20 == 0 && $this->cron) {
+            header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+            exit();
+        }
+        if ($this->cron) {
+            Tools::redirect($this->context->link->getModuleLink(
+                'gsitemap',
+                'cron',
+                [
+                    'continue' => '1',
+                    'token' => Tools::substr(Tools::hash('gsitemap/cron'), 0, 10),
+                    'type' => $new_link['type'],
+                    'lang' => $lang,
+                    'index' => $index,
+                    'id' => (int) $id_obj,
+                    'id_shop' => $this->context->shop->id,
+                ]
+            ));
+        } else {
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
+                'tab_module' => $this->tab,
+                'module_name' => $this->name,
+                'configure' => $this->name,
+                'continue' => 1,
+                'type' => $new_link['type'],
+                'lang' => $lang,
+                'index' => $index,
+                'id' => (int) $id_obj,
+                'id_shop' => $this->context->shop->id,
+            ]));
+        }
+        exit();
     }
 
     /**
@@ -873,15 +876,14 @@ class Gsitemap extends Module
             $this->context->controller->errors[] = $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', [], 'Modules.Gsitemap.Admin');
 
             return false;
-        } else {
-            @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . 'test.txt');
         }
+        @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . 'test.txt');
 
         if ($id_shop != 0) {
             $this->context->shop = new Shop((int) $id_shop);
         }
 
-        $type = Tools::getValue('type') ? Tools::getValue('type') : '';
+        $type = Tools::getValue('type') ?: '';
         $languages = Language::getLanguages(true, $this->context->shop->id);
         $lang_stop = Tools::getValue('lang') ? true : false;
         $id_obj = Tools::getValue('id') ? (int) Tools::getValue('id') : 0;
@@ -890,7 +892,8 @@ class Gsitemap extends Module
             $index = (Tools::getValue('index') && Tools::getValue('lang') == $lang['iso_code']) ? (int) Tools::getValue('index') : 0;
             if ($lang_stop && $lang['iso_code'] != Tools::getValue('lang')) {
                 continue;
-            } elseif ($lang_stop && $lang['iso_code'] == Tools::getValue('lang')) {
+            }
+            if ($lang_stop && $lang['iso_code'] == Tools::getValue('lang')) {
                 $lang_stop = false;
             }
 
@@ -992,7 +995,7 @@ class Gsitemap extends Module
      */
     protected function getPriorityPage($page)
     {
-        return Configuration::get('GSITEMAP_PRIORITY_' . Tools::strtoupper($page)) ? Configuration::get('GSITEMAP_PRIORITY_' . Tools::strtoupper($page)) : 0.1;
+        return Configuration::get('GSITEMAP_PRIORITY_' . Tools::strtoupper($page)) ?: 0.1;
     }
 
     /**
@@ -1055,16 +1058,13 @@ class Gsitemap extends Module
             return $directory;
         }
 
-        $directory .= DIRECTORY_SEPARATOR;
-
-        return $directory;
+        return $directory . DIRECTORY_SEPARATOR;
     }
 
     protected function removeControlCharacters($text)
     {
         $text = (string) preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $text);
-        $text = (string) preg_replace('!\s+!', ' ', $text);
 
-        return $text;
+        return (string) preg_replace('!\s+!', ' ', $text);
     }
 }

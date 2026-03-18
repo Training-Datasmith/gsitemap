@@ -40,10 +40,10 @@ class GsitemapCronModuleFrontController extends ModuleFrontController
 
         // If this is the first request to generate, we delete all previous sitemaps
         if (!Tools::getIsset('continue')) {
-            $this->module->emptySitemap((int) $id_shop);
+            $this->module->emptySitemap($id_shop);
         }
 
         // Run generation
-        $this->module->createSitemap((int) $id_shop);
+        $this->module->createSitemap($id_shop);
     }
 }
