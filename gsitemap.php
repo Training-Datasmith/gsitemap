@@ -390,7 +390,7 @@ class Gsitemap extends Module
             return false;
         }
         if ($index % 20 == 0 && $this->cron) {
-            header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+            header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . urlencode(Tools::substr(Tools::hash('gsitemap/cron'), 0, 10)) . '&type=' . urlencode((string) $new_link['type']) . '&lang=' . urlencode((string) $lang) . '&index=' . (int) $index . '&id=' . (int) $id_obj . '&id_shop=' . (int) $this->context->shop->id);
             exit();
         }
         if ($this->cron) {

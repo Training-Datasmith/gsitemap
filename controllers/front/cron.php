@@ -35,7 +35,7 @@ class GsitemapCronModuleFrontController extends ModuleFrontController
             $list_id_shop[] = (int) $shop['id_shop'];
         }
 
-        $id_shop = (Tools::getIsset('id_shop') && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
+        $id_shop = (Tools::getIsset('id_shop') && in_array((int) Tools::getValue('id_shop'), $list_id_shop, true)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
 
         // Mark a flag that we are in cron context
         $this->module->cron = true;
