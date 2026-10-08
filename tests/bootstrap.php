@@ -28,6 +28,7 @@ require __DIR__ . '/Support/PrestaShopStubs.php';
 require __DIR__ . '/Support/Exceptions.php';
 require __DIR__ . '/Support/XmlAssertions.php';
 require __DIR__ . '/Support/Schema.php';
+require __DIR__ . '/Support/DbConfig.php';
 
 $gsitemapActiveRoot = sys_get_temp_dir() . '/gsitemap-ps-root-active';
 if (!is_dir($gsitemapActiveRoot)) {

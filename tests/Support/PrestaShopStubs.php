@@ -116,12 +116,9 @@ class Db
     private function pdo()
     {
         if (!self::$pdo) {
-            $host = getenv('GSITEMAP_DB_HOST') ? getenv('GSITEMAP_DB_HOST') : '127.0.0.1';
-            $name = getenv('GSITEMAP_DB_NAME') ? getenv('GSITEMAP_DB_NAME') : 'gsitemap';
-            $user = getenv('GSITEMAP_DB_USER') ? getenv('GSITEMAP_DB_USER') : 'gsitemap';
-            $pass = getenv('GSITEMAP_DB_PASSWORD') ? getenv('GSITEMAP_DB_PASSWORD') : 'gsitemap';
+            list($user, $pass) = \GsitemapTests\Support\DbConfig::credentials();
             self::$pdo = new \PDO(
-                'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8',
+                \GsitemapTests\Support\DbConfig::dsn(),
                 $user,
                 $pass,
                 array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION)

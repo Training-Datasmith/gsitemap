@@ -31,13 +31,17 @@ class SitemapWriterTest extends TestCase
     {
         \Configuration::set('PS_REWRITING_SETTINGS', 1);
         $module = $this->makeModule();
-        $path = $this->psRoot() . '/cdata.xml';
-        $fd = fopen($path, 'wb');
-        fwrite($fd, '<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>');
-        $module->exposeAddSitemapNode($fd, 'http://shop.example/p?a=1&b=2', 0.5, 'weekly', null);
-        fwrite($fd, '</url></urlset>');
-        fclose($fd);
-        list($dom, $xpath) = $this->loadUrlset($path);
+        $index = 0;
+        $links = array(
+            array(
+                'type' => 'home',
+                'page' => 'home',
+                'link' => 'http://shop.example/p?a=1&b=2',
+                'image' => false,
+            ),
+        );
+        $this->assertTrue($module->exposeRecursiveSitemapCreator($links, 'en', $index));
+        list($dom, $xpath) = $this->loadUrlset($this->pathInRoot('1_en_0_sitemap.xml'));
         $loc = $xpath->evaluate('string(//sm:url/sm:loc)');
         $this->assertSame('http://shop.example/p?a=1&b=2', $loc);
     }
