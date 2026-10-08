@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="bootstrap.php"
+         colors="true"
+         backupGlobals="false"
+         backupStaticAttributes="false">
+    <testsuites>
+        <testsuite name="all">
+            <file>Unit/AddLinkCronRefreshTest.php</file>
+            <file>Unit/ConfigurationFiltersTest.php</file>
+            <file>Unit/ConstructorAndHelpersTest.php</file>
+            <file>Unit/CronControllerTest.php</file>
+            <file>Unit/EntityLinksTest.php</file>
+            <file>Unit/GetContentTest.php</file>
+            <file>Unit/LifecycleTest.php</file>
+            <file>Unit/SitemapWriterTest.php</file>
+            <file>Unit/UpgradeTest.php</file>
+        </testsuite>
+    </testsuites>
+    <php>
+        <ini name="error_reporting" value="-1"/>
+        <ini name="display_errors" value="1"/>
+        <env name="GSITEMAP_DB_HOST" value="127.0.0.1"/>
+        <env name="GSITEMAP_DB_NAME" value="gsitemap"/>
+        <env name="GSITEMAP_DB_USER" value="gsitemap"/>
+        <env name="GSITEMAP_DB_PASSWORD" value="gsitemap"/>
+    </php>
+</phpunit>

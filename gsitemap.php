@@ -230,6 +230,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_PRODUCT',
             'GSITEMAP_PRIORITY_CATEGORY',
             'GSITEMAP_PRIORITY_MANUFACTURER',
+            'GSITEMAP_PRIORITY_SUPPLIER',
             'GSITEMAP_PRIORITY_CMS',
             'GSITEMAP_FREQUENCY',
             'GSITEMAP_LAST_EXPORT',
@@ -383,7 +384,20 @@ class Gsitemap extends Module
 
                 return false;
             } elseif ($index % 20 == 0 && $this->cron) {
-                header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+                $refreshUrl = $this->context->link->getModuleLink(
+                    'gsitemap',
+                    'cron',
+                    [
+                        'continue' => '1',
+                        'token' => Tools::substr(Tools::hash('gsitemap/cron'), 0, 10),
+                        'type' => $new_link['type'],
+                        'lang' => $lang,
+                        'index' => $index,
+                        'id' => (int) $id_obj,
+                        'id_shop' => $this->context->shop->id,
+                    ]
+                );
+                header('Refresh: 5; url=' . $refreshUrl);
                 exit();
             } else {
                 if ($this->cron) {
@@ -960,7 +974,7 @@ class Gsitemap extends Module
         foreach ($link_sitemap as $file) {
             fwrite($write_fd, '<url>' . PHP_EOL);
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
-            $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
+            $this->addSitemapNode($write_fd, strip_tags($file['link']), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
 
             $images = [];
             if (isset($file['image']) && $file['image']) {
@@ -970,7 +984,7 @@ class Gsitemap extends Module
                 $images = array_merge($images, $file['images']);
             }
             foreach ($images as $image) {
-                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])));
+                $this->addSitemapNodeImage($write_fd, strip_tags($image['link']));
             }
             fwrite($write_fd, '</url>' . PHP_EOL);
         }
@@ -1006,15 +1020,25 @@ class Gsitemap extends Module
      */
     protected function addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
     {
+        if (Configuration::get('PS_REWRITING_SETTINGS')) {
+            $locOut = '<![CDATA[' . $loc . ']]>';
+        } else {
+            $locOut = htmlspecialchars($loc, ENT_COMPAT, 'UTF-8');
+        }
         fwrite(
             $fd,
-            '<loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $loc . ']]>' : $loc) . '</loc>' . PHP_EOL . ($last_mod ? '<lastmod>' . date('c', strtotime($last_mod)) . '</lastmod>' : '') . PHP_EOL . '<changefreq>' . $change_freq . '</changefreq>' . PHP_EOL . '<priority>' . number_format((float) $priority, 1, '.', '') . '</priority>' . PHP_EOL
+            '<loc>' . $locOut . '</loc>' . PHP_EOL . ($last_mod ? '<lastmod>' . date('c', strtotime($last_mod)) . '</lastmod>' : '') . PHP_EOL . '<changefreq>' . $change_freq . '</changefreq>' . PHP_EOL . '<priority>' . number_format((float) $priority, 1, '.', '') . '</priority>' . PHP_EOL
         );
     }
 
     protected function addSitemapNodeImage($fd, $link)
     {
-        fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '</image:image>' . PHP_EOL);
+        if (Configuration::get('PS_REWRITING_SETTINGS')) {
+            $linkOut = '<![CDATA[' . $link . ']]>';
+        } else {
+            $linkOut = htmlspecialchars($link, ENT_COMPAT, 'UTF-8');
+        }
+        fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . $linkOut . '</image:loc>' . PHP_EOL . '</image:image>' . PHP_EOL);
     }
 
     /**
