@@ -32,18 +32,24 @@ class SitemapWriterTest extends TestCase
         \Configuration::set('PS_REWRITING_SETTINGS', 1);
         $module = $this->makeModule();
         $index = 0;
+        $imageUrl = 'http://shop.example/img/p/1.jpg?a=1&b=2';
         $links = array(
             array(
                 'type' => 'home',
                 'page' => 'home',
                 'link' => 'http://shop.example/p?a=1&b=2',
-                'image' => false,
+                'image' => array('link' => $imageUrl),
             ),
         );
         $this->assertTrue($module->exposeRecursiveSitemapCreator($links, 'en', $index));
         list($dom, $xpath) = $this->loadUrlset($this->pathInRoot('1_en_0_sitemap.xml'));
         $loc = $xpath->evaluate('string(//sm:url/sm:loc)');
         $this->assertSame('http://shop.example/p?a=1&b=2', $loc);
+        $this->assertSame(
+            $imageUrl,
+            $xpath->evaluate('string(//sm:url/image:image/image:loc)'),
+            'CDATA image loc must not double-encode query string'
+        );
     }
 
     public function testImageNode()
@@ -53,13 +59,14 @@ class SitemapWriterTest extends TestCase
         $path = $this->psRoot() . '/image.xml';
         $fd = fopen($path, 'wb');
         fwrite($fd, '<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"><url>');
-        $module->exposeAddSitemapNodeImage($fd, 'http://shop.example/img/x.jpg');
+        $module->exposeAddSitemapNodeImage($fd, 'http://shop.example/img/x.jpg?a=1&b=2');
         fwrite($fd, '</url></urlset>');
         fclose($fd);
         list($dom, $xpath) = $this->loadUrlset($path);
         $this->assertSame(
-            'http://shop.example/img/x.jpg',
-            $xpath->evaluate('string(//image:loc)')
+            'http://shop.example/img/x.jpg?a=1&b=2',
+            $xpath->evaluate('string(//image:loc)'),
+            'non-CDATA image loc must escape ampersands for valid XML'
         );
     }
 

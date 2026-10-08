@@ -2,3 +2,6 @@
 /translations/*.php
 /vendor/
 /.php_cs.cache
+/composer-setup.php
+/installer.sig
+/composer.phar

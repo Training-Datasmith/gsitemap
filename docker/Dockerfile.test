@@ -11,7 +11,6 @@ RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list \
     && docker-php-ext-install pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
-RUN php -m | grep -E '^(PDO|pdo_mysql|dom|json|libxml|mbstring|SimpleXML|xml|xmlwriter)$' \
-    && php -r "new PDO('mysql:host=127.0.0.1;dbname=mysql', 'root', 'root');" 2>/dev/null || true
+RUN php -m | grep -E '^(PDO|pdo_mysql|dom|json|libxml|mbstring|SimpleXML|xml|xmlwriter)$'
 
 WORKDIR /app

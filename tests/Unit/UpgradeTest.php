@@ -22,6 +22,7 @@ class UpgradeTest extends TestCase
 
     public function testUpgrade440SetsManufacturerPriority()
     {
+        \Configuration::deleteByName('GSITEMAP_PRIORITY_MANUFACTURER');
         require_once dirname(__DIR__) . '/../upgrade/upgrade-4.4.0.php';
         $module = $this->makeModule();
         $this->assertTrue(upgrade_module_4_4_0($module));
@@ -39,6 +40,8 @@ class UpgradeTest extends TestCase
 
     public function testUpgrade220RebuildsTableWhenActive()
     {
+        \Configuration::deleteByName('GSITEMAP_PRIORITY_HOME');
+        $this->pdo->exec('DROP TABLE IF EXISTS `ps_gsitemap_sitemap`');
         require_once dirname(__DIR__) . '/../upgrade/install-2.2.0.php';
         $module = $this->makeModule();
         $module->active = true;

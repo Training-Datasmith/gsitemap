@@ -12,12 +12,14 @@ class LifecycleTest extends TestCase
 
     public function testInstallWritesEveryDefaultAndCreatesTableAndHook()
     {
+        $this->clearGsitemapModuleInstallState();
         $module = $this->makeModule();
         $this->assertTrue($module->install());
         $this->assertSame(1.0, \Configuration::get('GSITEMAP_PRIORITY_HOME'));
         $this->assertSame(0.7, \Configuration::get('GSITEMAP_PRIORITY_SUPPLIER'));
         $this->assertSame('weekly', \Configuration::get('GSITEMAP_FREQUENCY'));
         $this->assertSame('', \Configuration::get('GSITEMAP_DISABLE_LINKS'));
+        $this->assertTrue(array_key_exists('GSITEMAP_LAST_EXPORT', \Configuration::all()));
         $this->assertFalse(\Configuration::get('GSITEMAP_LAST_EXPORT'));
         $rows = $this->pdo->query("SHOW TABLES LIKE 'ps_gsitemap_sitemap'")->fetchAll();
         $this->assertNotEmpty($rows);
@@ -65,12 +67,19 @@ class LifecycleTest extends TestCase
     {
         $path = $this->psRoot();
         $this->removeTree($path);
-        file_put_contents($path, 'x');
-        $module = $this->makeModule();
-        $this->assertFalse($module->createSitemap());
-        $this->assertNotEmpty($module->context->controller->errors);
-        unlink($path);
-        mkdir($path, 0777, true);
+        try {
+            file_put_contents($path, 'x');
+            $module = $this->makeModule();
+            $this->assertFalse($module->createSitemap());
+            $this->assertNotEmpty($module->context->controller->errors);
+        } finally {
+            if (file_exists($path) && !is_dir($path)) {
+                unlink($path);
+            }
+            if (!is_dir($path)) {
+                mkdir($path, 0777, true);
+            }
+        }
     }
 
     public function testCreateSitemapWritesHomeChunkAndIndex()

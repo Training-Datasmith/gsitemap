@@ -124,4 +124,22 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             );
         }
     }
+
+    protected function clearGsitemapModuleInstallState()
+    {
+        foreach (array(
+            'GSITEMAP_PRIORITY_HOME',
+            'GSITEMAP_PRIORITY_PRODUCT',
+            'GSITEMAP_PRIORITY_CATEGORY',
+            'GSITEMAP_PRIORITY_MANUFACTURER',
+            'GSITEMAP_PRIORITY_SUPPLIER',
+            'GSITEMAP_PRIORITY_CMS',
+            'GSITEMAP_FREQUENCY',
+            'GSITEMAP_LAST_EXPORT',
+            'GSITEMAP_DISABLE_LINKS',
+        ) as $key) {
+            \Configuration::deleteByName($key);
+        }
+        $this->pdo->exec('DROP TABLE IF EXISTS `ps_gsitemap_sitemap`');
+    }
 }
