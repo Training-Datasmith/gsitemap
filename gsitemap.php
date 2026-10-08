@@ -1023,7 +1023,7 @@ class Gsitemap extends Module
         if (Configuration::get('PS_REWRITING_SETTINGS')) {
             $locOut = '<![CDATA[' . $loc . ']]>';
         } else {
-            $locOut = htmlspecialchars($loc, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8');
+            $locOut = htmlspecialchars($loc);
         }
         fwrite(
             $fd,
@@ -1036,7 +1036,7 @@ class Gsitemap extends Module
         if (Configuration::get('PS_REWRITING_SETTINGS')) {
             $linkOut = '<![CDATA[' . $link . ']]>';
         } else {
-            $linkOut = htmlspecialchars($link, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8');
+            $linkOut = htmlspecialchars($link);
         }
         fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . $linkOut . '</image:loc>' . PHP_EOL . '</image:image>' . PHP_EOL);
     }

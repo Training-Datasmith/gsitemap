@@ -27,6 +27,26 @@ class SitemapWriterTest extends TestCase
         $this->assertSame('2020-06-15T13:45:00+00:00', $xpath->evaluate('string(//sm:url/sm:lastmod)'));
     }
 
+    public function testNodeNonCdataLocBytesMatchOneArgHtmlspecialchars()
+    {
+        \Configuration::set('PS_REWRITING_SETTINGS', 0);
+        $url = 'http://shop.example/o\'brien?a=1&b=2';
+        $module = $this->makeModule();
+        $path = $this->psRoot() . '/apostrophe.xml';
+        $fd = fopen($path, 'wb');
+        fwrite($fd, '<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>');
+        $module->exposeAddSitemapNode($fd, $url, 0.9, 'weekly', null);
+        fwrite($fd, '</url></urlset>');
+        fclose($fd);
+        $raw = file_get_contents($path);
+        $expectedLoc = '<loc>' . htmlspecialchars($url) . '</loc>';
+        $this->assertContains(
+            $expectedLoc,
+            $raw,
+            'non-CDATA loc wire format must match one-arg htmlspecialchars($url) at runtime'
+        );
+    }
+
     public function testNodeUsesCdataWithoutDoubleEncodingWhenRewritingOn()
     {
         \Configuration::set('PS_REWRITING_SETTINGS', 1);
